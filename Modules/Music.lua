@@ -5,6 +5,7 @@ local MusicModule = {}
 
 --DEFINE SERVICES--
 local MarketplaceService = game:GetService("MarketplaceService")
+local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game.ReplicatedStorage
 
 
@@ -37,31 +38,42 @@ local NewSong = nil
 
 
 --FUNCTIONS--
-function MusicModule:PlaySong(Song)
-	LastSong = Song
-
+function MusicModule:PlaySong(Song, LoopSong, SetPlaybackSpeed)
+	NewSong = Song
+	
 	PlaybackObject.SoundId = Song.SoundId
-	PlaybackObject.PlaybackSpeed = Song.PlaybackSpeed
-
+	
+	if SetPlaybackSpeed then
+		PlaybackObject.PlaybackSpeed = Song.PlaybackSpeed
+	end
+	
+	if LoopSong then
+		PlaybackObject.Looped = true
+	else
+		PlaybackObject.Looped = false
+	end
+	
 	if PlaybackObject.Playing then
 		PlaybackObject:Stop()
 	end
-
+	
 	PlaybackObject:Play()
-
+	
 	local SoundId = string.sub(NewSong.SoundId, 14)
 	local Asset = MarketplaceService:GetProductInfo(SoundId)
-
+	
 	return PlaybackObject
 end
 
 function MusicModule:PlayRandomSong()
 	local Songs = MusicList:GetChildren()
+	
 	if #Songs >= 2 then
 		repeat NewSong = Songs[math.random(1, #Songs)] until NewSong ~= LastSong and NewSong:IsA("Sound")
 		
+		LastSong = NewSong
 		MusicModule:PlaySong(NewSong)
-
+		
 		return PlaybackObject
 	else
 		warn("MusicList must have two or more songs!")
